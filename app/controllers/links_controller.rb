@@ -1,5 +1,6 @@
 class LinksController < ApplicationController
-  before_action :set_link, only: [:show, :edit, :update, :destroy]
+  before_action :authorized_user, only: [:edit, :update, :destroy]
+  before_filter :authenticate_user!, :except => [:index, :show]
 
   # GET /links
   # GET /links.json
@@ -10,11 +11,12 @@ class LinksController < ApplicationController
   # GET /links/1
   # GET /links/1.json
   def show
+    @link = Link.find(params[:id])
   end
 
   # GET /links/new
   def new
-    @link = Link.new
+    @link = current_user.links.build
   end
 
   # GET /links/1/edit
@@ -24,16 +26,11 @@ class LinksController < ApplicationController
   # POST /links
   # POST /links.json
   def create
-    @link = Link.new(link_params)
-
-    respond_to do |format|
-      if @link.save
-        format.html { redirect_to @link, notice: 'Link was successfully created.' }
-        format.json { render :show, status: :created, location: @link }
-      else
-        format.html { render :new }
-        format.json { render json: @link.errors, status: :unprocessable_entity }
-      end
+    @link = current_user.links.build(link_params)
+    if @link.save
+      redirect_to @link, notice: 'Link was successfully created.'
+    else
+      render action: 'new'
     end
   end
 
@@ -42,11 +39,9 @@ class LinksController < ApplicationController
   def update
     respond_to do |format|
       if @link.update(link_params)
-        format.html { redirect_to @link, notice: 'Link was successfully updated.' }
-        format.json { render :show, status: :ok, location: @link }
+       redirect_to @link, notice: 'Link was successfully updated.'
       else
-        format.html { render :edit }
-        format.json { render json: @link.errors, status: :unprocessable_entity }
+        render action: 'edit'
       end
     end
   end
@@ -66,6 +61,18 @@ class LinksController < ApplicationController
     def set_link
       @link = Link.find(params[:id])
     end
+
+    def correct_user
+      @link = current_user.links.find_by(id: params[:id])
+      redirect_to links_path, notice: "Not authorized to edit this link" if @link.nil?
+    end
+
+
+    def authorized_user
+      @link = current_user.links.find_by(id: params[:id])
+      redirect_to links_path, notice: "Not authorized to edit this link" if @link.nil?
+    end
+       
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def link_params
