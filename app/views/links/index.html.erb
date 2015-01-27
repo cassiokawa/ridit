@@ -14,20 +14,52 @@
   <tbody>
     <% @links.each do |link| %>
       <tr>
-        <td><%= link.title %></td>
-        <td><%= link.user.try(:email) %></td>
-        <td><%= link_to 'Show', link_path(link) %></td>
- 
+
+
+        <td>
+          <div class="btn-group">
+            <a ><%= link.title %></a>
+          </div>
+        </td>
+
+        <td>
+          <div class="btn-group">
+            <a><%= link.user.try(:email) %></a>
+          </div>
+        </td>
+
+        <td class="btn btn-default btn-sm">
+          <div class="btn-group">
+            <a><%= link_to 'Show', link_path(link) %></a>
+          </div>
+        </td>
+
         <% if link.user == current_user %>
-          <td><%= link_to 'Edit', edit_link_path(link) %></td>
-          <td><%= link_to 'Destroy', link, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+          <td class="btn btn-default btn-sm"><%= link_to 'Edit', edit_link_path(link) %></td>
+          <td class="btn btn-default btn-sm"><%= link_to 'Destroy', link, method: :delete, data: { confirm: 'Are you sure?' } %></td>
         <% end %>
       
+      <td>
+        <div class="btn-group">
+            <a class="btn btn-default btn-sm" href="<%= link.url %>">Visit Link</a>
+            <%= link_to like_link_path(link), method: :put, class: "btn btn-default btn-sm" do %>
+              <span class="glyphicon glyphicon-chevron-up"></span>
+              Upvote
+              <%= link.get_upvotes.size %>
+          <% end %>
+            <%= link_to dislike_link_path(link), method: :put, class: "btn btn-default btn-sm" do %>
+              <span class="glyphicon glyphicon-chevron-down">
+              Downvote
+              <%= link.get_downvotes.size %>
+          <% end %>
+        </div>
+      </td>  
+
+
+
       </tr>
     <% end %>
   </tbody>
 </table>
 
 <br>
-
-<%= link_to 'New Link', new_link_path %>
